@@ -1,0 +1,29 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Kaiqu\Desktop\dev\auto-product-image-downloader\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Kaiqu\Desktop\dev\auto-product-image-downloader
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.0.0
+collecting ... collected 19 items
+
+tests/test_break.py::test_break_disk_full PASSED                         [  5%]
+tests/test_break.py::test_break_api_malformed_json PASSED                [ 10%]
+tests/test_break.py::test_break_unwritable_folder PASSED                 [ 15%]
+tests/test_break.py::test_break_very_long_description PASSED             [ 21%]
+tests/test_core.py::test_sanitize_filename PASSED                        [ 26%]
+tests/test_core.py::test_rate_limiter PASSED                             [ 31%]
+tests/test_core.py::test_image_validation_valid PASSED                   [ 36%]
+tests/test_core.py::test_image_validation_invalid PASSED                 [ 42%]
+tests/test_core.py::test_image_validation_too_small PASSED               [ 47%]
+tests/test_integration.py::test_full_generate_flow PASSED                [ 52%]
+tests/test_unit.py::test_read_spreadsheet_missing_columns PASSED         [ 57%]
+tests/test_unit.py::test_read_spreadsheet_empty_rows PASSED              [ 63%]
+tests/test_unit.py::test_read_spreadsheet_invalid_format PASSED          [ 68%]
+tests/test_unit.py::test_validate_image_corrupted PASSED                 [ 73%]
+tests/test_unit.py::test_filename_conflicts PASSED                       [ 78%]
+tests/test_unit.py::test_rate_limiter_burst PASSED                       [ 84%]
+tests/test_unit.py::test_bing_client_search_error PASSED                 [ 89%]
+tests/test_unit.py::test_disk_cache_logic PASSED                         [ 94%]
+tests/test_unit.py::test_retry_decorator_failures PASSED                 [100%]
+
+============================= 19 passed in 7.24s ==============================

@@ -1,0 +1,43 @@
+[project]
+name = "auto-product-image-downloader"
+version = "0.1.0"
+description = "A desktop app to download product images from Excel spreadsheets using free Google Images scraping"
+requires-python = ">=3.11"
+authors = [
+    { name = "Developer", email = "dev@example.com" }
+]
+dependencies = [
+    "PySide6>=6.5.0",
+    "openpyxl>=3.1.0",
+    "httpx>=0.24.0",
+    "Pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "platformdirs>=3.10.0",
+    "beautifulsoup4>=4.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "black>=23.9.0",
+    "mypy>=1.5.0",
+    "pytest>=7.4.0",
+    "pytest-cov",
+    "types-Pillow",
+    "types-openpyxl",
+    "pyinstaller>=6.0.0",
+    "psutil",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
