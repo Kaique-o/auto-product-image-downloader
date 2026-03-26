@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 class GoogleImageScraper:
     """
-    Scrapes Google Images search results using httpx and BeautifulSoup.
-    This replaces the Bing API dependency.
+    Scrapes images using Yahoo Image Search.
+    This replaces the Google dependency which is aggressively blocking scrapers.
     """
     def __init__(self, safe_search: str = "active"):
         self.safe_search = safe_search
@@ -22,52 +22,35 @@ class GoogleImageScraper:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9",
-            "Referer": "https://www.google.com/"
         }
         self.client = httpx.Client(timeout=20.0, follow_redirects=True)
 
     @with_retry()
     def search_images(self, query: str, count: int = 5) -> list[ImageResult]:
         """
-        Executes a Google Images search and parses the result.
+        Executes an Image search and parses the result.
         """
-        search_url = "https://www.google.com/search"
+        search_url = "https://images.search.yahoo.com/search/images"
         params = {
-            "q": query,
-            "tbm": "isch", # Image search
-            "safe": self.safe_search
+            "p": query,
         }
         
         try:
             response = self.client.get(search_url, headers=self.headers, params=params)
             response.raise_for_status()
             
-            # Simple parsing: Google uses some JS but also includes metadata in the HTML
-            # Newer Google Images pages store image data in JSON-like blocks in <script> tags
-            # We look for metadata patterns or standard <img> tags for thumbnails
+            html = response.text
             
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(html, "html.parser")
             results = []
+            valid_urls = []
             
-            # Pattern for original image URLs in modern Google search
-            # Often found in AF_initDataCallback or similar blobs
-            # We'll use a regex to find all URL patterns that look like images
-            
-            # Fallback strategy: Extract from simple <img> tags if JS parsing fails
-            img_tags = soup.find_all("img")
-            
-            # Modern Google Images often embeds data in a script tag with data like [ "https://...", width, height ]
-            # We'll try to find these JSON-like structures
-            data_blocks = re.findall(r"\[\"(http[^\"]+?)\",\d+,\d+\]", response.text)
-            
-            valid_urls = [url for url in data_blocks if any(url.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"])]
-            
-            if not valid_urls:
-                # Fallback to thumbnails if direct URLs aren't found
-                for img in img_tags:
-                    src = img.get("src") or img.get("data-src")
-                    if src and src.startswith("http"):
-                        valid_urls.append(src)
+            # Extract high res URLs robustly using data-origurl attribute
+            elements = soup.find_all(attrs={"data-origurl": True})
+            for el in elements:
+                orig_url = el.get("data-origurl")
+                if orig_url and orig_url.startswith("http"):
+                    valid_urls.append(orig_url)
 
             # Deduplicate and limit
             seen = set()
@@ -75,7 +58,7 @@ class GoogleImageScraper:
                 if url not in seen:
                     results.append(ImageResult(
                         url=url,
-                        source_url="https://www.google.com",
+                        source_url="https://images.search.yahoo.com",
                         width=0, # Width/Height not always easily available from simple scrape
                         height=0,
                         content_type="image/jpeg",
@@ -91,7 +74,7 @@ class GoogleImageScraper:
             return results
             
         except Exception as e:
-            logger.error(f"Google Scrape failed for query '{query}': {e}")
+            logger.error(f"Image Scrape failed for query '{query}': {e}")
             raise SearchError(f"Scrape failed: {e}") from e
 
     def __enter__(self):
