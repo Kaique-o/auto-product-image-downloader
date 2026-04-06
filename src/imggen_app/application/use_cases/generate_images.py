@@ -1,7 +1,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Callable, Optional, Iterator
+from typing import Callable, Optional, Iterator, Protocol
 import httpx
 
 from imggen_app.domain.models import (
@@ -12,7 +12,11 @@ from imggen_app.domain.models import (
     SessionSummary
 )
 from imggen_app.domain.exceptions import ImgGenError, SearchError, DownloadError, ValidationError
-from imggen_app.infrastructure.search.google_scraper import GoogleImageScraper as ImageSearchPort
+
+class ImageSearchPort(Protocol):
+    def search_images(self, query: str, count: int = 5) -> list[ImageResult]:
+        ...
+
 from imggen_app.infrastructure.http.rate_limiter import RateLimiter
 from imggen_app.infrastructure.cache.disk_cache import DiskCache
 from imggen_app.utils.image_utils import sanitize_filename, validate_and_convert_to_jpeg

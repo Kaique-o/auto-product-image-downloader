@@ -2,7 +2,7 @@ from pathlib import Path
 from PySide6.QtCore import QThread, Signal
 from imggen_app.domain.models import ProductRow, SessionSummary
 from imggen_app.application.use_cases.generate_images import ImageGeneratorUseCase
-from imggen_app.infrastructure.search.google_scraper import GoogleImageScraper
+from imggen_app.infrastructure.search.google_scraper import get_scraper
 from imggen_app.infrastructure.http.rate_limiter import RateLimiter
 from imggen_app.infrastructure.cache.disk_cache import DiskCache
 from imggen_app.config.settings import Settings
@@ -20,12 +20,14 @@ class ImageWorker(QThread):
         self, 
         settings: Settings, 
         rows: list[ProductRow], 
-        dest: Path
+        dest: Path,
+        search_engine: str = "Yahoo"
     ):
         super().__init__()
         self.settings = settings
         self.rows = rows
         self.dest = dest
+        self.search_engine = search_engine
         self.use_case: ImageGeneratorUseCase | None = None
 
     def run(self):
@@ -35,7 +37,8 @@ class ImageWorker(QThread):
         """
         try:
             # 1. Initialize Scraper (No API key needed)
-            search_client = GoogleImageScraper(
+            search_client = get_scraper(
+                engine_name=self.search_engine,
                 safe_search="active" if self.settings.safe_search != "Off" else "off"
             )
             

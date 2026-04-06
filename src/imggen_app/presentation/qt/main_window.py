@@ -3,7 +3,7 @@ import logging
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QPushButton, QLabel, QFileDialog, QProgressBar, 
-    QTextEdit, QMessageBox, QFrame, QSizePolicy
+    QTextEdit, QMessageBox, QFrame, QSizePolicy, QComboBox
 )
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QIcon, QFont, QPalette, QColor
@@ -93,7 +93,20 @@ class MainWindow(QMainWindow):
         dest_layout.addWidget(self.btn_select_dest)
         main_layout.addWidget(dest_group)
 
-        # 4. Generate Section
+        # 4. Search Engine Section
+        engine_group = QFrame()
+        engine_group.setFrameShape(QFrame.StyledPanel)
+        engine_layout = QHBoxLayout(engine_group)
+        
+        self.combo_engine = QComboBox()
+        self.combo_engine.addItems(["Yahoo", "Google", "eBay"])
+        
+        engine_layout.addWidget(QLabel("Step 4: Select Search Engine:"))
+        engine_layout.addStretch()
+        engine_layout.addWidget(self.combo_engine)
+        main_layout.addWidget(engine_group)
+
+        # 5. Generate Section
         gen_layout = QHBoxLayout()
         self.btn_generate = QPushButton("GENERATE IMAGES")
         self.btn_generate.setFixedHeight(50)
@@ -171,7 +184,7 @@ class MainWindow(QMainWindow):
             self.set_ui_enabled(False)
             
             # Start Worker
-            self.worker = ImageWorker(self.settings, rows, self.destination_dir)
+            self.worker = ImageWorker(self.settings, rows, self.destination_dir, self.combo_engine.currentText())
             self.worker.progress.connect(self.progress_bar.setValue)
             self.worker.log_msg.connect(self.append_log)
             self.worker.finished.connect(self.on_finished)
@@ -210,6 +223,7 @@ class MainWindow(QMainWindow):
         self.btn_download_template.setEnabled(enabled)
         self.btn_upload.setEnabled(enabled)
         self.btn_select_dest.setEnabled(enabled)
+        self.combo_engine.setEnabled(enabled)
         self.btn_generate.setEnabled(enabled)
         self.btn_cancel.setEnabled(not enabled)
 
